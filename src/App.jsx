@@ -219,18 +219,18 @@ export default function App() {
       
       {/* HEADER SECTION (MINIMALIST) */}
       <header className="border-b border-zinc-200 py-6 px-6 sm:px-8 bg-zinc-50/30">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-widest text-black uppercase">
+        <div className="max-w-[1500px] mx-auto flex flex-col items-center justify-center">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-[0.3em] text-black uppercase text-center">
             TIMELEDGER
           </h1>
-          <div className="text-xs text-zinc-400 font-semibold tracking-wider uppercase">
+          <div className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase mt-2">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
       </header>
 
       {/* TWO-COLUMN GRID LAYOUT (ADHERING TO 8PT GRID & INWARD COLLAPSE) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="flex-1 max-w-[1500px] w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
         <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4">
@@ -242,14 +242,11 @@ export default function App() {
             >
               <span>{showSummary ? 'Hide Sum Totals' : 'Show Sum Totals'}</span>
             </button>
-            <span className="text-xs text-zinc-400">
-              *Double click description cell to edit notes directly.
-            </span>
           </div>
 
           <div className="excel-table-container">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm min-w-[850px]">
+              <table className="w-full border-collapse text-left text-sm min-w-[750px] lg:min-w-full">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
                     <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
