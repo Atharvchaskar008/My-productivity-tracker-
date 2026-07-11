@@ -218,17 +218,12 @@ export default function App() {
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans transition-colors duration-300">
       
       {/* HEADER SECTION (MINIMALIST) */}
-      <header className="border-b border-zinc-200 py-6 px-6 sm:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-4">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-black uppercase">
-              Time Ledger
-            </h1>
-            <span className="text-lg sm:text-xl font-bold text-zinc-400 uppercase">
-              — Logged Time Sheets
-            </span>
-          </div>
-          <div className="text-xs text-zinc-400 font-medium tracking-wider uppercase sm:text-right">
+      <header className="border-b border-zinc-200 py-6 px-6 sm:px-8 bg-zinc-50/30">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-widest text-black uppercase">
+            TIMELEDGER
+          </h1>
+          <div className="text-xs text-zinc-400 font-semibold tracking-wider uppercase">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
@@ -238,7 +233,7 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
-        <section className="lg:col-span-8 order-2 lg:order-1 flex flex-col space-y-4">
+        <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4">
           
           <div className="flex items-center justify-between">
             <button
@@ -254,22 +249,22 @@ export default function App() {
 
           <div className="excel-table-container">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm min-w-[700px]">
+              <table className="w-full border-collapse text-left text-sm min-w-[850px]">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
-                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
+                    <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
                       Date
                     </th>
-                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[12%]">
+                    <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[12%]">
                       Block
                     </th>
-                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
+                    <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
                       Duration
                     </th>
-                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[42%]">
+                    <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[42%]">
                       Description / Notes
                     </th>
-                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[10%] text-center">
+                    <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[10%] text-center">
                       Action
                     </th>
                   </tr>
@@ -279,21 +274,21 @@ export default function App() {
                   {/* INLINE EXCEL DATA INSERTION ROW */}
                   <tr className="bg-zinc-50/50">
                     {/* Date Input */}
-                    <td className="p-3 border-r border-zinc-100">
+                    <td className="p-4 border-r border-zinc-100">
                       <input
                         type="date"
                         value={insertForm.date}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, date: e.target.value }))}
-                        className="w-full text-xs bg-white border border-zinc-200 rounded px-3 py-2 h-12 focus:outline-none focus:border-black font-medium"
+                        className="w-full text-sm bg-white border border-zinc-200 rounded px-4 py-2.5 h-14 focus:outline-none focus:border-black font-medium"
                       />
                     </td>
                     
                     {/* Block Select Dropdown */}
-                    <td className="p-3 border-r border-zinc-100">
+                    <td className="p-4 border-r border-zinc-100">
                       <select
                         value={insertForm.block}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, block: e.target.value }))}
-                        className="w-full text-xs bg-white border border-zinc-200 rounded px-3 py-2 h-12 focus:outline-none focus:border-black font-semibold"
+                        className="w-full text-sm bg-white border border-zinc-200 rounded px-4 py-2.5 h-14 focus:outline-none focus:border-black font-semibold"
                       >
                         <option value="DSA">DSA</option>
                         <option value="DEV">DEV</option>
@@ -302,7 +297,7 @@ export default function App() {
                     </td>
 
                     {/* Time Input (Hours / Minutes) */}
-                    <td className="p-3 border-r border-zinc-100">
+                    <td className="p-4 border-r border-zinc-100">
                       <div className="flex space-x-1">
                         <input
                           type="number"
@@ -311,7 +306,7 @@ export default function App() {
                           max="23"
                           value={insertForm.hours}
                           onChange={(e) => setInsertForm(prev => ({ ...prev, hours: e.target.value }))}
-                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-2 h-12 focus:outline-none focus:border-black font-mono"
+                          className="w-1/2 text-sm text-center bg-white border border-zinc-200 rounded py-2.5 h-14 focus:outline-none focus:border-black font-mono"
                         />
                         <input
                           type="number"
@@ -320,28 +315,28 @@ export default function App() {
                           max="59"
                           value={insertForm.minutes}
                           onChange={(e) => setInsertForm(prev => ({ ...prev, minutes: e.target.value }))}
-                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-2 h-12 focus:outline-none focus:border-black font-mono"
+                          className="w-1/2 text-sm text-center bg-white border border-zinc-200 rounded py-2.5 h-14 focus:outline-none focus:border-black font-mono"
                         />
                       </div>
                     </td>
 
                     {/* Description Text Input */}
-                    <td className="p-3 border-r border-zinc-100">
+                    <td className="p-4 border-r border-zinc-100">
                       <input
                         type="text"
                         placeholder="Log new sheet description..."
                         value={insertForm.note}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, note: e.target.value }))}
-                        className="w-full text-xs bg-white border border-zinc-200 rounded px-4 py-2 h-12 focus:outline-none focus:border-black"
+                        className="w-full text-sm bg-white border border-zinc-200 rounded px-4 py-2.5 h-14 focus:outline-none focus:border-black"
                       />
                     </td>
 
                     {/* Add Action Button */}
-                    <td className="p-3 text-center">
+                    <td className="p-4 text-center">
                       <button
                         onClick={handleAddRow}
                         disabled={!(parseInt(insertForm.hours) > 0 || parseInt(insertForm.minutes) > 0)}
-                        className={`w-full h-12 flex items-center justify-center rounded border transition-all ${
+                        className={`w-full h-14 flex items-center justify-center rounded border transition-all ${
                           (parseInt(insertForm.hours) > 0 || parseInt(insertForm.minutes) > 0)
                             ? 'bg-black border-black text-white hover:bg-zinc-800 cursor-pointer'
                             : 'bg-zinc-100 border-zinc-200 text-zinc-300 cursor-not-allowed'
@@ -358,45 +353,39 @@ export default function App() {
                     timeLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-zinc-50/70 transition-colors">
                         {/* Date Cell */}
-                        <td className="p-4 font-mono text-xs border-r border-zinc-100 text-zinc-500">
+                        <td className="p-5 font-mono text-xs border-r border-zinc-100 text-zinc-500">
                           {log.date}
                         </td>
                         
                         {/* Block Badge Cell */}
-                        <td className="p-4 border-r border-zinc-100">
-                          <span className={`text-[10px] font-bold px-4 py-2.5 rounded border tracking-widest uppercase ${
-                            log.block === 'DSA' 
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                              : log.block === 'DEV'
-                                ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
-                                : 'bg-amber-50 text-amber-700 border-amber-100'
-                          }`}>
+                        <td className="p-5 border-r border-zinc-100">
+                          <span className="text-[10px] font-bold px-4 py-2.5 rounded border tracking-widest uppercase bg-white text-zinc-900 border-zinc-300">
                             {log.block}
                           </span>
                         </td>
 
                         {/* Duration Cell */}
-                        <td className="p-4 font-mono text-sm font-semibold border-r border-zinc-100 text-zinc-900">
+                        <td className="p-5 font-mono text-sm font-semibold border-r border-zinc-100 text-zinc-900">
                           {formatTableDuration(log.duration)}
                         </td>
 
                         {/* Editable Description Cell */}
-                        <td className="p-3 border-r border-zinc-100">
+                        <td className="p-4 border-r border-zinc-100">
                           <input
                             id={`note-input-${log.id}`}
                             type="text"
                             value={log.note}
                             onChange={(e) => handleUpdateNote(log.id, e.target.value)}
                             placeholder="Add cell note..."
-                            className="excel-input text-xs px-3 py-2.5 focus:bg-white text-zinc-700 focus:text-zinc-900 leading-relaxed font-sans"
+                            className="excel-input text-sm px-3 py-2 focus:bg-white text-zinc-700 focus:text-zinc-900 leading-relaxed font-sans"
                           />
                         </td>
 
                         {/* Delete Cell */}
-                        <td className="p-3 text-center">
+                        <td className="p-4 text-center">
                           <button
                             onClick={() => handleDeleteRow(log.id)}
-                            className="w-9 h-9 mx-auto flex items-center justify-center rounded border border-zinc-100 bg-white text-zinc-400 hover:text-red-600 hover:border-red-100 hover:bg-red-50/50 transition-all"
+                            className="w-10 h-10 mx-auto flex items-center justify-center rounded border border-zinc-100 bg-white text-zinc-400 hover:text-red-600 hover:border-red-100 hover:bg-red-50/50 transition-all"
                             title="Delete Row"
                           >
                             <Trash2 size={12} />
@@ -424,16 +413,16 @@ export default function App() {
                   {/* EXCEL SUMMARY (FORMULA) FOOTER ROW */}
                   {showSummary && (
                     <tr className="bg-zinc-50 font-medium text-zinc-900 border-t-2 border-zinc-200">
-                      <td className="p-4 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
+                      <td className="p-5 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
                         Total SUM
                       </td>
-                      <td className="p-4 border-r border-zinc-100">
+                      <td className="p-5 border-r border-zinc-100">
                         {/* empty cell for block column */}
                       </td>
-                      <td className="p-4 font-mono text-sm font-bold border-r border-zinc-100 text-black">
+                      <td className="p-5 font-mono text-sm font-bold border-r border-zinc-100 text-black">
                         {formatTableDuration(totalSecondsAll)}
                       </td>
-                      <td className="p-4 text-xs text-zinc-500 leading-relaxed" colSpan="2">
+                      <td className="p-5 text-xs text-zinc-500 leading-relaxed" colSpan="2">
                         <div className="flex flex-wrap gap-x-4 gap-y-1">
                           <span>DSA: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DSA'))}</strong></span>
                           <span>DEV: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DEV'))}</strong></span>
@@ -451,7 +440,7 @@ export default function App() {
         </section>
 
         {/* RIGHT COLUMN (4 COLS): CIRCULAR CLOCK STOPWATCH */}
-        <section className="lg:col-span-4 order-1 lg:order-2 flex flex-col items-center p-6 border border-zinc-200 rounded-2xl bg-white shadow-sm h-fit space-y-6">
+        <section className="lg:col-span-4 order-2 lg:order-2 flex flex-col items-center p-6 border border-zinc-200 rounded-2xl bg-white shadow-sm h-fit space-y-6">
           
           <div className="w-full text-center">
             <span className="text-xs font-bold tracking-widest uppercase text-zinc-400 block mb-1">
