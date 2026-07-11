@@ -29,32 +29,8 @@ export default function App() {
         console.error("Failed to parse cached logs:", e);
         return [];
       }
-    } else {
-      // Default Mock Data in Excel Spreadsheet format
-      return [
-        {
-          id: 'mock-1',
-          date: todayStr,
-          block: 'DSA',
-          duration: 4800, // 1h 20m
-          note: 'LeetCode Graph Algorithms (DFS/BFS traversals)'
-        },
-        {
-          id: 'mock-2',
-          date: todayStr,
-          block: 'DEV',
-          duration: 8700, // 2h 25m
-          note: 'Auth system integration and API routing endpoints'
-        },
-        {
-          id: 'mock-3',
-          date: todayStr,
-          block: 'AI',
-          duration: 3600, // 1h 00m
-          note: 'Prompt engineering test scripts & evaluation metrics'
-        }
-      ];
     }
+    return [];
   });
 
   // Stopwatch state
@@ -217,20 +193,19 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans transition-colors duration-300 overflow-x-hidden">
       
-      {/* HEADER SECTION (MINIMALIST) */}
-      <header className="border-b border-zinc-200 py-6 px-6 sm:px-8 bg-zinc-50/30">
-        <div className="max-w-[1500px] mx-auto flex flex-col items-center justify-center">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-[0.3em] text-black uppercase text-center">
+      <main className="flex-1 max-w-[1500px] w-full mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-8 min-w-0">
+        
+        {/* PAGE HEADER — aligned with content grid */}
+        <header className="mb-8 lg:mb-10">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-[0.25em] text-black uppercase">
             TIMELEDGER
           </h1>
-          <div className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase mt-2">
+          <p className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase mt-2">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
-          </div>
-        </div>
-      </header>
+          </p>
+        </header>
 
-      {/* TWO-COLUMN GRID LAYOUT (ADHERING TO 8PT GRID & INWARD COLLAPSE) */}
-      <main className="flex-1 max-w-[1500px] w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-w-0">
         
         {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
         <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4 min-w-0">
@@ -556,12 +531,8 @@ export default function App() {
 
         </section>
 
+        </div>
       </main>
-
-      {/* FOOTER */}
-      <footer className="border-t border-zinc-100 py-6 text-center text-[10px] text-zinc-400 uppercase tracking-widest font-semibold bg-zinc-50/50">
-         Made by Atharv Chaskar for maximizing productivity
-      </footer>
 
     </div>
   );
