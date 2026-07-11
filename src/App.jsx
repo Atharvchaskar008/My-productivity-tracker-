@@ -567,7 +567,7 @@ export default function App() {
 
       {/* FOOTER */}
       <footer className="border-t border-zinc-100 py-6 text-center text-[10px] text-zinc-400 uppercase tracking-widest font-semibold bg-zinc-50/50">
-        Time Ledger v1.1.0 — Structured and simplified logging
+         Made by Atharv Chaskar for maximizing productivity
       </footer>
 
     </div>
