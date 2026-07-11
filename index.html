@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>my-time</title>
+    <script>
+      (function () {
+        var selectors = 'vercel-live-feedback,#vercel-live-feedback,[data-vercel-toolbar],iframe[src*="vercel.live"],script[src*="vercel.live"]';
+        function removeToolbar() {
+          document.querySelectorAll(selectors).forEach(function (el) { el.remove(); });
+        }
+        removeToolbar();
+        new MutationObserver(removeToolbar).observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

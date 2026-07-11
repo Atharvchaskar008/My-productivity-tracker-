@@ -113,8 +113,14 @@
 vercel-live-feedback,
 #vercel-live-feedback,
 [data-vercel-toolbar],
-iframe[src*="vercel.live"] {
+iframe[src*="vercel.live"],
+script[src*="vercel.live"],
+[class*="vercel-toolbar"],
+[id*="vercel-toolbar"] {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
