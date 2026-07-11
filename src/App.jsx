@@ -333,6 +333,66 @@ function EditBlocksPanel({ blocks, onSave, onClose, onReset }) {
   );
 }
 
+// ─── UNDO TOAST ───────────────────────────────────────────────────────
+function UndoToast({ label, onUndo, onDismiss, durationMs = 5000 }) {
+  const [progress, setProgress] = useState(100);
+
+  useEffect(() => {
+    const start = Date.now();
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.max(0, 100 - (elapsed / durationMs) * 100);
+      setProgress(pct);
+      if (pct === 0) { clearInterval(tick); onDismiss(); }
+    }, 50);
+    return () => clearInterval(tick);
+  }, [durationMs, onDismiss]);
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-6 right-6 z-[100] animate-modal-in"
+    >
+      <div className="bg-white border border-pewter rounded-xl shadow-[0_4px_24px_rgba(105,114,114,0.18)] overflow-hidden w-72">
+        <div className="px-4 py-3 flex items-center gap-3">
+          {/* Icon */}
+          <div className="w-7 h-7 rounded-lg bg-ivory border border-pewter flex items-center justify-center shrink-0">
+            <RotateCcw size={13} className="text-gray" />
+          </div>
+
+          {/* Label */}
+          <span className="flex-1 text-[12px] text-gray font-medium leading-snug">{label}</span>
+
+          {/* Undo button */}
+          <button
+            onClick={onUndo}
+            className="shrink-0 px-3 h-7 rounded-lg bg-gray text-ivory text-[11px] font-bold tracking-wider hover:bg-sage-hover active:scale-95 transition-all"
+          >
+            Undo
+          </button>
+
+          {/* Dismiss X */}
+          <button
+            onClick={onDismiss}
+            className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-slate hover:text-gray transition-colors"
+          >
+            <X size={12} />
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-0.5 bg-ivory">
+          <div
+            className="h-full bg-gray transition-none"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App() {
 
@@ -346,6 +406,22 @@ export default function App() {
   });
 
   const [showEditPanel, setShowEditPanel] = useState(false);
+
+  // ── Undo ──
+  // Snapshot shape: { timeLogs, customBlocks, label }
+  const [undoSnapshot, setUndoSnapshot] = useState(null);
+  const undoTimerRef = useRef(null);
+
+  // Push a snapshot before any destructive action
+  const pushUndo = (snapshot) => {
+    clearTimeout(undoTimerRef.current);
+    setUndoSnapshot(snapshot);
+  };
+
+  const dismissUndo = () => {
+    clearTimeout(undoTimerRef.current);
+    setUndoSnapshot(null);
+  };
 
   // Persist blocks
   useEffect(() => {
@@ -365,6 +441,11 @@ export default function App() {
 
   // Reset to first-visit setup
   const handleResetSetup = () => {
+    pushUndo({
+      timeLogs,
+      customBlocks,
+      label: 'Blocks cleared. Undo to restore.'
+    });
     setShowEditPanel(false);
     setCustomBlocks(null);
     localStorage.removeItem('hypertrack_custom_blocks');
@@ -468,7 +549,25 @@ export default function App() {
   };
 
   const handleDeleteRow = (id) => {
+    pushUndo({
+      timeLogs,
+      customBlocks,
+      label: 'Row deleted. Undo to restore.'
+    });
     setTimeLogs(prev => prev.filter(log => log.id !== id));
+  };
+
+  // ── Undo restore ──
+  const handleUndo = () => {
+    if (!undoSnapshot) return;
+    if (undoSnapshot.timeLogs !== undefined) setTimeLogs(undoSnapshot.timeLogs);
+    if (undoSnapshot.customBlocks !== undefined) {
+      setCustomBlocks(undoSnapshot.customBlocks);
+      if (undoSnapshot.customBlocks !== null) {
+        localStorage.setItem('hypertrack_custom_blocks', JSON.stringify(undoSnapshot.customBlocks));
+      }
+    }
+    setUndoSnapshot(null);
   };
 
   // ── Formatters ──
@@ -520,6 +619,16 @@ export default function App() {
           onSave={handleSaveBlocks}
           onClose={() => setShowEditPanel(false)}
           onReset={handleResetSetup}
+        />
+      )}
+
+      {/* ── UNDO TOAST ── */}
+      {undoSnapshot && (
+        <UndoToast
+          key={undoSnapshot.label + undoSnapshot.timeLogs?.length}
+          label={undoSnapshot.label}
+          onUndo={handleUndo}
+          onDismiss={dismissUndo}
         />
       )}
 
