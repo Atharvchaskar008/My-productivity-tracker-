@@ -4,20 +4,8 @@ import {
   Pause, 
   RotateCcw, 
   Trash2, 
-  Calendar, 
-  ChevronLeft, 
-  ChevronRight, 
-  Sparkles, 
-  Clock, 
-  BookOpen, 
-  Code, 
-  FileText, 
-  CheckSquare, 
-  List, 
-  Bold, 
-  Italic, 
-  X,
-  PlusCircle
+  Plus, 
+  Clock 
 } from 'lucide-react';
 
 // Helper to get local date string in YYYY-MM-DD format (timezone independent)
@@ -28,22 +16,12 @@ const getLocalDateString = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-// Helper to parse local YYYY-MM-DD string into local Date object (timezone independent)
-const parseLocalDate = (dateStr) => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
 const todayStr = getLocalDateString();
 
 export default function App() {
-  // --- STATE WITH DIRECT LOCALSTORAGE INITIALIZATION ---
-  const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
-  const [saveStatus, setSaveStatus] = useState('Saved'); // 'Saved' | 'Saving...'
-
+  // --- STATE MANAGEMENT ---
   const [timeLogs, setTimeLogs] = useState(() => {
-    const cachedLogs = localStorage.getItem('hypertrack_time_logs');
+    const cachedLogs = localStorage.getItem('hypertrack_excel_logs');
     if (cachedLogs !== null) {
       try {
         return JSON.parse(cachedLogs);
@@ -52,42 +30,31 @@ export default function App() {
         return [];
       }
     } else {
-      // Default Mock Data for today to make it look stunning instantly
+      // Default Mock Data in Excel Spreadsheet format
       return [
         {
           id: 'mock-1',
-          pillar: 'dsa',
-          duration: 4800, // 1h 20m
           date: todayStr,
-          note: 'Solved 3 LeetCode questions on Graphs (DFS & BFS traversal pattern)',
-          createdAt: new Date().toISOString()
+          block: 'DSA',
+          duration: 4800, // 1h 20m
+          note: 'LeetCode Graph Algorithms (DFS/BFS traversals)'
         },
         {
           id: 'mock-2',
-          pillar: 'development',
-          duration: 9900, // 2h 45m
           date: todayStr,
-          note: 'Implemented full Tailwind configuration, configured Vite server, and designed dashboard UI',
-          createdAt: new Date().toISOString()
+          block: 'DEV',
+          duration: 8700, // 2h 25m
+          note: 'Auth system integration and API routing endpoints'
         },
         {
           id: 'mock-3',
-          pillar: 'study',
-          duration: 4200, // 1h 10m
           date: todayStr,
-          note: 'Read Chapter 4 of Designing Data-Intensive Applications regarding replication strategies',
-          createdAt: new Date().toISOString()
+          block: 'AI',
+          duration: 3600, // 1h 00m
+          note: 'Prompt engineering test scripts & evaluation metrics'
         }
       ];
     }
-  });
-
-  const [notes, setNotes] = useState(() => {
-    const cachedNotes = localStorage.getItem('hypertrack_notes');
-    if (cachedNotes !== null) {
-      return cachedNotes;
-    }
-    return `# HyperTrack Scratchpad 🚀\n\n- [ ] Review LeetCode graph pattern sheet\n- [ ] Commit React state changes to main branch\n- [x] Align CSS variables for dark mode theme\n\n*Quick notes for today:* Keep up the grinding pace!`;
   });
 
   // Stopwatch state
@@ -95,44 +62,22 @@ export default function App() {
   const [isStopwatchRunning, setIsStopwatchRunning] = useState(false);
   const stopwatchIntervalRef = useRef(null);
 
-  // Modal for Inject Description
-  const [injectModal, setInjectModal] = useState({
-    isOpen: false,
-    pillar: null, // 'dsa' | 'development' | 'study'
-    duration: 0,
+  // Form states for the top insertion row of the Excel sheet
+  const [insertForm, setInsertForm] = useState({
+    date: todayStr,
+    block: 'DSA',
+    hours: '',
+    minutes: '',
     note: ''
   });
 
-  // Manual input state for each pillar
-  const [manualEntry, setManualEntry] = useState({
-    dsa: { hours: '', minutes: '', note: '' },
-    development: { hours: '', minutes: '', note: '' },
-    study: { hours: '', minutes: '', note: '' }
-  });
+  // Reference to focus description of newly injected row
+  const newlyCreatedRowIdRef = useRef(null);
 
-  // Date strip scrolling reference state (start of the 7-day window)
-  const [weekStart, setWeekStart] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 3); // center on today
-    return d;
-  });
-
-  // Sync Logs to localStorage on changes
+  // --- PERSISTENCE ---
   useEffect(() => {
-    localStorage.setItem('hypertrack_time_logs', JSON.stringify(timeLogs));
+    localStorage.setItem('hypertrack_excel_logs', JSON.stringify(timeLogs));
   }, [timeLogs]);
-
-  // Center week strip when selected date changes
-  const centerWeekOnDate = (dateStr) => {
-    const d = parseLocalDate(dateStr);
-    d.setDate(d.getDate() - 3);
-    setWeekStart(d);
-  };
-
-  const handleDateSelect = (dateStr) => {
-    setSelectedDate(dateStr);
-    centerWeekOnDate(dateStr);
-  };
 
   // --- STOPWATCH LOGIC ---
   useEffect(() => {
@@ -161,750 +106,470 @@ export default function App() {
     setStopwatchTime(0);
   };
 
-  const handleInjectClick = (pillar) => {
+  // Inject stopwatch time directly into a new spreadsheet row
+  const handleInject = (blockType) => {
     if (stopwatchTime === 0) return;
-    setIsStopwatchRunning(false); // Pause stopwatch
-    setInjectModal({
-      isOpen: true,
-      pillar,
+    setIsStopwatchRunning(false);
+
+    const newId = Date.now().toString();
+    const newLog = {
+      id: newId,
+      date: insertForm.date || todayStr,
+      block: blockType,
       duration: stopwatchTime,
-      note: ''
-    });
-  };
-
-  const confirmInject = () => {
-    const newLog = {
-      id: Date.now().toString(),
-      pillar: injectModal.pillar,
-      duration: injectModal.duration,
-      date: selectedDate,
-      note: injectModal.note.trim() || 'Stopwatch injected session',
-      createdAt: new Date().toISOString()
-    };
-    
-    setTimeLogs((prev) => [newLog, ...prev]);
-    setStopwatchTime(0); // Reset timer
-    setInjectModal({ isOpen: false, pillar: null, duration: 0, note: '' });
-  };
-
-  const cancelInject = () => {
-    setInjectModal({ isOpen: false, pillar: null, duration: 0, note: '' });
-  };
-
-  // --- MANUAL LOG ENTRY LOGIC ---
-  const handleManualAdd = (pillar) => {
-    const entry = manualEntry[pillar];
-    const hours = parseInt(entry.hours) || 0;
-    const minutes = parseInt(entry.minutes) || 0;
-    const totalSeconds = (hours * 3600) + (minutes * 60);
-
-    if (totalSeconds <= 0) return;
-
-    const newLog = {
-      id: Date.now().toString(),
-      pillar,
-      duration: totalSeconds,
-      date: selectedDate,
-      note: entry.note.trim() || 'Manual session entry',
-      createdAt: new Date().toISOString()
+      note: '' // Empty so user can fill it in immediately
     };
 
+    // Prepend new log
     setTimeLogs((prev) => [newLog, ...prev]);
-    
-    // Clear fields
-    setManualEntry((prev) => ({
-      ...prev,
-      [pillar]: { hours: '', minutes: '', note: '' }
-    }));
+    setStopwatchTime(0); // Reset stopwatch
+
+    // Mark for focusing
+    newlyCreatedRowIdRef.current = newId;
   };
 
-  const handleManualChange = (pillar, field, value) => {
-    setManualEntry((prev) => ({
-      ...prev,
-      [pillar]: {
-        ...prev[pillar],
-        [field]: value
+  // Auto-focus description input of newly created row (if injected)
+  useEffect(() => {
+    if (newlyCreatedRowIdRef.current) {
+      const element = document.getElementById(`note-input-${newlyCreatedRowIdRef.current}`);
+      if (element) {
+        element.focus();
       }
+      newlyCreatedRowIdRef.current = null;
+    }
+  }, [timeLogs]);
+
+  // --- EXCEL ACTIONS ---
+  const handleAddRow = () => {
+    const hrs = parseInt(insertForm.hours) || 0;
+    const mins = parseInt(insertForm.minutes) || 0;
+    const totalSecs = (hrs * 3600) + (mins * 60);
+
+    if (totalSecs <= 0) return;
+
+    const newLog = {
+      id: Date.now().toString(),
+      date: insertForm.date || todayStr,
+      block: insertForm.block,
+      duration: totalSecs,
+      note: insertForm.note.trim()
+    };
+
+    setTimeLogs((prev) => [newLog, ...prev]);
+
+    // Reset entry fields (keep date & block for rapid sequential entry)
+    setInsertForm((prev) => ({
+      ...prev,
+      hours: '',
+      minutes: '',
+      note: ''
     }));
   };
 
-  const handleDeleteCard = (id) => {
-    setTimeLogs((prev) => prev.filter(log => log.id !== id));
+  const handleUpdateNote = (id, newNote) => {
+    setTimeLogs((prev) =>
+      prev.map((log) => (log.id === id ? { ...log, note: newNote } : log))
+    );
   };
 
-  // --- DATE STRIP GENERATOR ---
-  const getDaysInStrip = () => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(weekStart);
-      d.setDate(weekStart.getDate() + i);
-      days.push(d);
-    }
-    return days;
+  const handleDeleteRow = (id) => {
+    setTimeLogs((prev) => prev.filter((log) => log.id !== id));
   };
 
-  const shiftWeek = (offsetDays) => {
-    setWeekStart((prev) => {
-      const d = new Date(prev);
-      d.setDate(d.getDate() + offsetDays);
-      return d;
-    });
-  };
-
-  // Check if a day has any logs per pillar
-  const hasLogsForDateAndPillar = (dateStr, pillar) => {
-    return timeLogs.some(log => log.date === dateStr && log.pillar === pillar);
-  };
-
-  // --- FORMATTING HELPERS ---
-  const formatTimeDigits = (totalSeconds) => {
+  // --- TIME DISPLAY FORMATTERS ---
+  const formatStopwatchTime = (totalSeconds) => {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatCardDuration = (totalSeconds) => {
+  const formatTableDuration = (totalSeconds) => {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
-    
-    if (hrs > 0) {
-      return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
-    }
-    if (mins > 0) {
-      return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
-    }
-    return `${secs}s`;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getColumnTotalHours = (pillar) => {
-    const filtered = timeLogs.filter(log => log.pillar === pillar && log.date === selectedDate);
-    const totalSecs = filtered.reduce((acc, log) => acc + log.duration, 0);
-    if (totalSecs === 0) return '0h';
-    const hrs = Math.floor(totalSecs / 3600);
-    const mins = Math.floor((totalSecs % 3600) / 60);
-    return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+  // --- CALCULATING AGGREGATES (EXCEL SUMMARY ROW) ---
+  const totalSecondsAll = timeLogs.reduce((acc, log) => acc + log.duration, 0);
+
+  const getPillarTotalSeconds = (pillar) => {
+    return timeLogs
+      .filter((log) => log.block === pillar)
+      .reduce((acc, log) => acc + log.duration, 0);
   };
 
-  // --- NOTES MARKDOWN WIDGET LOGIC ---
-  const handleNotesChange = (e) => {
-    const val = e.target.value;
-    setNotes(val);
-    setSaveStatus('Saving...');
-    localStorage.setItem('hypertrack_notes', val);
-    
-    // Simulate auto-save feedback delay
-    setTimeout(() => {
-      setSaveStatus('Saved');
-    }, 400);
+  const formatHoursDecimal = (totalSeconds) => {
+    const hrs = totalSeconds / 3600;
+    return hrs > 0 ? `${hrs.toFixed(2)} hrs` : '0.00 hrs';
   };
 
-  const insertMarkdown = (syntax) => {
-    const textarea = document.getElementById('notes-textarea');
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const before = text.substring(0, start);
-    const after = text.substring(end, text.length);
-    const selected = text.substring(start, end);
-
-    let replacement = '';
-    let newCursorPos = start;
-
-    switch (syntax) {
-      case 'checkbox':
-        replacement = `${before}\n- [ ] ${selected}${after}`;
-        newCursorPos = start + 7 + selected.length;
-        break;
-      case 'bullet':
-        replacement = `${before}\n- ${selected}${after}`;
-        newCursorPos = start + 3 + selected.length;
-        break;
-      case 'bold':
-        replacement = `${before}**${selected || 'bold'}**${after}`;
-        newCursorPos = start + 2 + (selected ? selected.length : 4) + 2;
-        break;
-      case 'italic':
-        replacement = `${before}*${selected || 'italic'}*${after}`;
-        newCursorPos = start + 1 + (selected ? selected.length : 6) + 1;
-        break;
-      default:
-        return;
-    }
-
-    setNotes(replacement);
-    localStorage.setItem('hypertrack_notes', replacement);
-    setSaveStatus('Saving...');
-    
-    setTimeout(() => {
-      setSaveStatus('Saved');
-    }, 400);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 50);
-  };
-
-  // --- PILLAR SPECIFICS ---
-  const pillars = [
-    {
-      id: 'dsa',
-      title: 'DSA',
-      icon: <BookOpen size={18} className="text-emerald-400" />,
-      colorClass: 'emerald',
-      accentColor: '#10b981',
-      glowClass: 'glass-panel-glow-dsa',
-      headerBg: 'bg-emerald-950/40 border-emerald-500/20 text-emerald-300',
-      pillColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-    },
-    {
-      id: 'development',
-      title: 'Development',
-      icon: <Code size={18} className="text-indigo-400" />,
-      colorClass: 'indigo',
-      accentColor: '#6366f1',
-      glowClass: 'glass-panel-glow-dev',
-      headerBg: 'bg-indigo-950/40 border-indigo-500/20 text-indigo-300',
-      pillColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-    },
-    {
-      id: 'study',
-      title: 'Study',
-      icon: <Clock size={18} className="text-amber-400" />,
-      colorClass: 'amber',
-      accentColor: '#f59e0b',
-      glowClass: 'glass-panel-glow-study',
-      headerBg: 'bg-amber-950/40 border-amber-500/20 text-amber-300',
-      pillColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-    }
-  ];
+  // Calculate hands rotation degrees for analog clock representation
+  // 60 seconds = 360 degrees, so 1 second = 6 degrees
+  const secondsRotation = stopwatchTime * 6;
+  // 60 minutes = 360 degrees, so 1 minute = 6 degrees. 1 second = 0.1 degree
+  const minutesRotation = (stopwatchTime / 60) * 6;
 
   return (
-    <div className="relative min-h-screen font-sans bg-zinc-950 text-zinc-100 flex flex-col transition-all duration-300">
+    <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans transition-colors duration-300">
       
-      {/* BACKGROUND DECORATIVE GLOWS */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-emerald-600/5 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl pointer-events-none -z-10" />
-
-      {/* HEADER SECTION */}
-      <header className="border-b border-white/5 sticky top-0 bg-zinc-950/80 backdrop-blur-md z-40 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          
-          {/* Logo Branding */}
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setSelectedDate(todayStr)}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Sparkles size={18} className="text-white animate-pulse" />
-            </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-              HyperTrack
-            </span>
+      {/* HEADER SECTION (MINIMALIST) */}
+      <header className="border-b border-zinc-200 py-6 px-6 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-black uppercase">
+              Time Ledger
+            </h1>
+            <p className="text-xs text-zinc-400 font-medium tracking-wide mt-1">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
           </div>
-
-          {/* Minimalist Date Picker Strip */}
-          <div className="flex items-center space-x-2">
-            
-            {/* Shift Week Left */}
-            <button 
-              onClick={() => shiftWeek(-7)} 
-              className="p-1.5 rounded-lg border border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all"
-              title="Previous Week"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            {/* Horizontal Timeline Strip */}
-            <div className="hidden sm:flex items-center space-x-1 border border-white/5 bg-zinc-950 p-1 rounded-xl">
-              {getDaysInStrip().map((day, idx) => {
-                const dateStr = getLocalDateString(day);
-                const isSelected = dateStr === selectedDate;
-                const isToday = dateStr === todayStr;
-                const dayName = day.toLocaleDateString('en-US', { weekday: 'short' });
-                const dayNum = day.getDate();
-
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedDate(dateStr)}
-                    className={`flex flex-col items-center justify-center px-3 py-1.5 rounded-lg transition-all ${
-                      isSelected 
-                        ? 'bg-zinc-800 text-white shadow-lg ring-1 ring-white/10' 
-                        : isToday
-                          ? 'border border-indigo-500/20 text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10'
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
-                    }`}
-                  >
-                    <span className="text-[10px] uppercase font-semibold tracking-wider opacity-60">
-                      {dayName}
-                    </span>
-                    <span className="text-sm font-bold mt-0.5 relative">
-                      {dayNum}
-                      {/* Check if logs exist for this date and render little colored dots */}
-                      <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex space-x-0.5">
-                        {hasLogsForDateAndPillar(dateStr, 'dsa') && <span className="w-1 h-1 rounded-full bg-emerald-500" />}
-                        {hasLogsForDateAndPillar(dateStr, 'development') && <span className="w-1 h-1 rounded-full bg-indigo-500" />}
-                        {hasLogsForDateAndPillar(dateStr, 'study') && <span className="w-1 h-1 rounded-full bg-amber-500" />}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Shift Week Right */}
-            <button 
-              onClick={() => shiftWeek(7)} 
-              className="p-1.5 rounded-lg border border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all"
-              title="Next Week"
-            >
-              <ChevronRight size={16} />
-            </button>
-
-            {/* Custom Date Input Pick & Today */}
-            <div className="flex items-center space-x-1">
-              <button 
-                onClick={() => handleDateSelect(todayStr)} 
-                className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
-              >
-                Today
-              </button>
-              
-              {/* Native Calendar Trigger */}
-              <div className="relative">
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => handleDateSelect(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full"
-                />
-                <button className="p-1.5 rounded-lg border border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all">
-                  <Calendar size={16} />
-                </button>
-              </div>
-            </div>
-
+          <div className="flex items-center space-x-1.5 text-xs text-zinc-400 font-medium tracking-wider uppercase">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Local Engine Active</span>
           </div>
-
-          {/* Slide out Notes Sidebar Toggle */}
-          <button 
-            onClick={() => setIsNotesOpen(!isNotesOpen)}
-            className={`p-2 rounded-xl border transition-all duration-300 flex items-center space-x-1.5 ${
-              isNotesOpen 
-                ? 'bg-zinc-800 border-indigo-500/30 text-indigo-400' 
-                : 'bg-zinc-900/60 border-white/5 text-zinc-400 hover:text-white hover:bg-zinc-850'
-            }`}
-          >
-            <FileText size={16} />
-            <span className="hidden sm:inline text-xs font-medium">Notes</span>
-            <span className={`w-1.5 h-1.5 rounded-full ${notes ? 'bg-emerald-500' : 'bg-transparent'} transition-all`} />
-          </button>
-
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col space-y-8">
+      {/* TWO-COLUMN GRID LAYOUT (ADHERING TO 8PT GRID & INWARD COLLAPSE) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Date Title Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/5 pb-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center space-x-2">
-              <span>Time Ledger</span>
-              <span className="text-zinc-500 font-normal text-lg sm:text-xl">
-                — {parseLocalDate(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-            </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm mt-1">
-              Select any date on the calendar strip to track logs and structure your pillars.
-            </p>
-          </div>
-          {selectedDate !== todayStr && (
-            <button
-              onClick={() => handleDateSelect(todayStr)}
-              className="mt-2 sm:mt-0 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-500/20 flex items-center space-x-1.5 transition-all w-fit"
-            >
-              <span>Back to Today</span>
-              <ArrowRightIcon size={12} />
-            </button>
-          )}
-        </div>
-
-        {/* HERO MODULE: THE UNIVERSAL STOPWATCH */}
-        <section className="glass-panel rounded-2xl border border-white/10 p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-transparent blur-xl pointer-events-none" />
+        {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
+        <section className="lg:col-span-8 flex flex-col space-y-4">
           
-          <div className="flex items-center space-x-2 text-zinc-500 uppercase tracking-widest text-xs font-bold mb-2">
-            <Clock size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
-            <span>Universal Time Engine</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold tracking-wider uppercase text-zinc-500">
+              Logged Time Sheets
+            </span>
+            <span className="text-xs text-zinc-400">
+              *Double click description cell to edit notes directly.
+            </span>
           </div>
 
-          {/* Precise Digital Timer */}
-          <div className="text-5xl sm:text-7xl font-bold font-mono tracking-wider text-white select-none drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-            {formatTimeDigits(stopwatchTime)}
+          <div className="excel-table-container">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="bg-zinc-50 border-b border-zinc-200">
+                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
+                      Date
+                    </th>
+                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[12%]">
+                      Block
+                    </th>
+                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
+                      Duration
+                    </th>
+                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[42%]">
+                      Description / Notes
+                    </th>
+                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[10%] text-center">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-200">
+                  
+                  {/* INLINE EXCEL DATA INSERTION ROW */}
+                  <tr className="bg-zinc-50/50">
+                    {/* Date Input */}
+                    <td className="p-2 border-r border-zinc-100">
+                      <input
+                        type="date"
+                        value={insertForm.date}
+                        onChange={(e) => setInsertForm(prev => ({ ...prev, date: e.target.value }))}
+                        className="w-full text-xs bg-white border border-zinc-200 rounded px-2 py-1.5 h-11 focus:outline-none focus:border-black font-medium"
+                      />
+                    </td>
+                    
+                    {/* Block Select Dropdown */}
+                    <td className="p-2 border-r border-zinc-100">
+                      <select
+                        value={insertForm.block}
+                        onChange={(e) => setInsertForm(prev => ({ ...prev, block: e.target.value }))}
+                        className="w-full text-xs bg-white border border-zinc-200 rounded px-2 py-1.5 h-11 focus:outline-none focus:border-black font-semibold"
+                      >
+                        <option value="DSA">DSA</option>
+                        <option value="DEV">DEV</option>
+                        <option value="AI">AI</option>
+                      </select>
+                    </td>
+
+                    {/* Time Input (Hours / Minutes) */}
+                    <td className="p-2 border-r border-zinc-100">
+                      <div className="flex space-x-1">
+                        <input
+                          type="number"
+                          placeholder="H"
+                          min="0"
+                          max="23"
+                          value={insertForm.hours}
+                          onChange={(e) => setInsertForm(prev => ({ ...prev, hours: e.target.value }))}
+                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-1.5 h-11 focus:outline-none focus:border-black font-mono"
+                        />
+                        <input
+                          type="number"
+                          placeholder="M"
+                          min="0"
+                          max="59"
+                          value={insertForm.minutes}
+                          onChange={(e) => setInsertForm(prev => ({ ...prev, minutes: e.target.value }))}
+                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-1.5 h-11 focus:outline-none focus:border-black font-mono"
+                        />
+                      </div>
+                    </td>
+
+                    {/* Description Text Input */}
+                    <td className="p-2 border-r border-zinc-100">
+                      <input
+                        type="text"
+                        placeholder="Log new sheet description..."
+                        value={insertForm.note}
+                        onChange={(e) => setInsertForm(prev => ({ ...prev, note: e.target.value }))}
+                        className="w-full text-xs bg-white border border-zinc-200 rounded px-3 py-1.5 h-11 focus:outline-none focus:border-black"
+                      />
+                    </td>
+
+                    {/* Add Action Button */}
+                    <td className="p-2 text-center">
+                      <button
+                        onClick={handleAddRow}
+                        disabled={!(parseInt(insertForm.hours) > 0 || parseInt(insertForm.minutes) > 0)}
+                        className={`w-full h-11 flex items-center justify-center rounded border transition-all ${
+                          (parseInt(insertForm.hours) > 0 || parseInt(insertForm.minutes) > 0)
+                            ? 'bg-black border-black text-white hover:bg-zinc-800 cursor-pointer'
+                            : 'bg-zinc-100 border-zinc-200 text-zinc-300 cursor-not-allowed'
+                        }`}
+                        title="Add record"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* SPREADSHEET LOG ENTRIES */}
+                  {timeLogs.length > 0 ? (
+                    timeLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-zinc-50/70 transition-colors">
+                        {/* Date Cell */}
+                        <td className="p-3 font-mono text-xs border-r border-zinc-100 text-zinc-500">
+                          {log.date}
+                        </td>
+                        
+                        {/* Block Badge Cell */}
+                        <td className="p-3 border-r border-zinc-100">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                            log.block === 'DSA' 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : log.block === 'DEV'
+                                ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                                : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {log.block}
+                          </span>
+                        </td>
+
+                        {/* Duration Cell */}
+                        <td className="p-3 font-mono text-sm font-semibold border-r border-zinc-100 text-zinc-900">
+                          {formatTableDuration(log.duration)}
+                        </td>
+
+                        {/* Editable Description Cell */}
+                        <td className="p-2 border-r border-zinc-100">
+                          <input
+                            id={`note-input-${log.id}`}
+                            type="text"
+                            value={log.note}
+                            onChange={(e) => handleUpdateNote(log.id, e.target.value)}
+                            placeholder="Add cell note..."
+                            className="excel-input text-xs px-2 py-1.5 focus:bg-white text-zinc-700 focus:text-zinc-900 leading-relaxed font-sans"
+                          />
+                        </td>
+
+                        {/* Delete Cell */}
+                        <td className="p-2 text-center">
+                          <button
+                            onClick={() => handleDeleteRow(log.id)}
+                            className="w-8 h-8 mx-auto flex items-center justify-center rounded border border-zinc-100 bg-white text-zinc-400 hover:text-red-600 hover:border-red-100 hover:bg-red-50/50 transition-all"
+                            title="Delete Row"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    /* EMPTY PLACEHOLDER */
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-zinc-400">
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                          <Clock size={20} className="text-zinc-300" />
+                          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                            No Time Blocks Logged
+                          </span>
+                          <span className="text-[11px] text-zinc-400 max-w-[280px]">
+                            Log manually above or run the stopwatch on the right.
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* EXCEL SUMMARY (FORMULA) FOOTER ROW */}
+                  <tr className="bg-zinc-50 font-medium text-zinc-900 border-t-2 border-zinc-200">
+                    <td className="p-3 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
+                      Total SUM
+                    </td>
+                    <td className="p-3 border-r border-zinc-100">
+                      {/* empty cell for block column */}
+                    </td>
+                    <td className="p-3 font-mono text-sm font-bold border-r border-zinc-100 text-black">
+                      {formatTableDuration(totalSecondsAll)}
+                    </td>
+                    <td className="p-3 text-xs text-zinc-500 leading-relaxed" colSpan="2">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        <span>DSA: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DSA'))}</strong></span>
+                        <span>DEV: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DEV'))}</strong></span>
+                        <span>AI: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('AI'))}</strong></span>
+                      </div>
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Stopwatch Controls */}
-          <div className="flex items-center space-x-4 mt-6">
+        </section>
+
+        {/* RIGHT COLUMN (4 COLS): CIRCULAR CLOCK STOPWATCH */}
+        <section className="lg:col-span-4 flex flex-col items-center p-6 border border-zinc-200 rounded-2xl bg-white shadow-sm h-fit space-y-6">
+          
+          <div className="w-full text-center">
+            <span className="text-xs font-bold tracking-widest uppercase text-zinc-400 block mb-1">
+              Visual Time Engine
+            </span>
+          </div>
+
+          {/* Minimalist Clock Face with Tick marks */}
+          <div className="clock-face shadow-sm flex items-center justify-center">
+            <div className="clock-center-dot" />
+            
+            {/* Major Ticks (12, 6, 3, 9) */}
+            <div className="absolute top-1 left-1/2 w-0.5 h-3 bg-zinc-900 -translate-x-1/2" />
+            <div className="absolute bottom-1 left-1/2 w-0.5 h-3 bg-zinc-900 -translate-x-1/2" />
+            <div className="absolute right-1 top-1/2 h-0.5 w-3 bg-zinc-900 -translate-y-1/2" />
+            <div className="absolute left-1 top-1/2 h-0.5 w-3 bg-zinc-900 -translate-y-1/2" />
+
+            {/* Minor Ticks (1, 2, 4, 5, 7, 8, 10, 11) */}
+            <div className="absolute top-4 right-1/4 w-0.5 h-1.5 bg-zinc-300 rotate-[30deg] origin-center" />
+            <div className="absolute top-12 right-6 w-0.5 h-1.5 bg-zinc-300 rotate-[60deg] origin-center" />
+            <div className="absolute bottom-12 right-6 w-0.5 h-1.5 bg-zinc-300 rotate-[120deg] origin-center" />
+            <div className="absolute bottom-4 right-1/4 w-0.5 h-1.5 bg-zinc-300 rotate-[150deg] origin-center" />
+            <div className="absolute bottom-4 left-1/4 w-0.5 h-1.5 bg-zinc-300 rotate-[210deg] origin-center" />
+            <div className="absolute bottom-12 left-6 w-0.5 h-1.5 bg-zinc-300 rotate-[240deg] origin-center" />
+            <div className="absolute top-12 left-6 w-0.5 h-1.5 bg-zinc-300 rotate-[300deg] origin-center" />
+            <div className="absolute top-4 left-1/4 w-0.5 h-1.5 bg-zinc-300 rotate-[330deg] origin-center" />
+
+            {/* Clock Hands */}
+            {/* Minutes Hand (zinc-400, shorter/thicker) */}
+            <div 
+              className="clock-hand h-11 w-1 bg-zinc-400"
+              style={{ transform: `translateX(-50%) rotate(${minutesRotation}deg)` }}
+            />
+            {/* Seconds Hand (zinc-900, longer/thinner) */}
+            <div 
+              className="clock-hand h-16 w-0.5 bg-zinc-900"
+              style={{ transform: `translateX(-50%) rotate(${secondsRotation}deg)` }}
+            />
+          </div>
+
+          {/* Digital Timer Value (5xl font, 700 bold weight, monospaced digits) */}
+          <div className="text-4xl font-bold font-mono tracking-wider text-black select-none">
+            {formatStopwatchTime(stopwatchTime)}
+          </div>
+
+          {/* Stopwatch Control Action Buttons (h-11 tap targets) */}
+          <div className="flex items-center space-x-3 w-full justify-center">
+            
+            {/* Reset Button */}
             <button
               onClick={handleStopwatchReset}
-              className="p-2.5 rounded-xl border border-white/5 bg-zinc-950 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all hover:scale-105 active:scale-95"
+              className="w-11 h-11 rounded-lg border border-zinc-200 bg-white text-zinc-600 hover:text-black hover:border-zinc-400 transition-all flex items-center justify-center active:scale-95"
               title="Reset Timer"
             >
-              <RotateCcw size={18} />
+              <RotateCcw size={16} />
             </button>
 
+            {/* Play/Pause Button */}
             <button
               onClick={handleStopwatchStartPause}
-              className={`px-8 py-3.5 rounded-xl font-semibold flex items-center space-x-2.5 shadow-lg transition-all hover:scale-[1.03] active:scale-[0.98] ${
+              className={`h-11 px-6 rounded-lg font-medium flex items-center space-x-2 border transition-all active:scale-[0.98] ${
                 isStopwatchRunning
-                  ? 'bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 shadow-red-500/5'
-                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-indigo-500/20'
+                  ? 'bg-zinc-100 border-zinc-300 text-black hover:bg-zinc-200'
+                  : 'bg-black border-black text-white hover:bg-zinc-800'
               }`}
             >
-              {isStopwatchRunning ? <Pause size={18} /> : <Play size={18} />}
-              <span>{isStopwatchRunning ? 'Pause Engine' : 'Start Engine'}</span>
+              {isStopwatchRunning ? <Pause size={14} /> : <Play size={14} />}
+              <span className="text-xs uppercase tracking-wider font-semibold">
+                {isStopwatchRunning ? 'Pause Engine' : 'Start Engine'}
+              </span>
             </button>
+
           </div>
 
-          {/* Inject action bar */}
-          <div className="mt-8 pt-6 border-t border-white/5 w-full max-w-xl text-center">
-            <span className="text-zinc-500 text-xs font-semibold uppercase tracking-wider block mb-4">
-              Inject time block directly into pillar
+          {/* Inject Buttons (h-11 tap targets) */}
+          <div className="pt-6 border-t border-zinc-200 w-full">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block text-center mb-3">
+              Inject time block directly
             </span>
             <div className="grid grid-cols-3 gap-2">
               <button
                 disabled={stopwatchTime === 0}
-                onClick={() => handleInjectClick('dsa')}
-                className={`py-2 px-3 text-xs sm:text-sm font-semibold rounded-xl border transition-all ${
+                onClick={() => handleInject('DSA')}
+                className={`h-11 text-xs font-semibold rounded-lg border transition-all ${
                   stopwatchTime === 0
-                    ? 'border-white/5 bg-zinc-900/20 text-zinc-600 cursor-not-allowed'
-                    : 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10 active:scale-95'
+                    ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
+                    : 'border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 active:scale-95'
                 }`}
               >
-                + DSA
+                DSA
               </button>
               <button
                 disabled={stopwatchTime === 0}
-                onClick={() => handleInjectClick('development')}
-                className={`py-2 px-3 text-xs sm:text-sm font-semibold rounded-xl border transition-all ${
+                onClick={() => handleInject('DEV')}
+                className={`h-11 text-xs font-semibold rounded-lg border transition-all ${
                   stopwatchTime === 0
-                    ? 'border-white/5 bg-zinc-900/20 text-zinc-600 cursor-not-allowed'
-                    : 'border-indigo-500/20 bg-indigo-500/5 text-indigo-400 hover:bg-indigo-500/10 active:scale-95'
+                    ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
+                    : 'border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 active:scale-95'
                 }`}
               >
-                + Development
+                DEV
               </button>
               <button
                 disabled={stopwatchTime === 0}
-                onClick={() => handleInjectClick('study')}
-                className={`py-2 px-3 text-xs sm:text-sm font-semibold rounded-xl border transition-all ${
+                onClick={() => handleInject('AI')}
+                className={`h-11 text-xs font-semibold rounded-lg border transition-all ${
                   stopwatchTime === 0
-                    ? 'border-white/5 bg-zinc-900/20 text-zinc-600 cursor-not-allowed'
-                    : 'border-amber-500/20 bg-amber-500/5 text-amber-400 hover:bg-amber-500/10 active:scale-95'
+                    ? 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
+                    : 'border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 active:scale-95'
                 }`}
               >
-                + Study
+                AI
               </button>
             </div>
           </div>
+
         </section>
 
-        {/* THREE PILLAR TRACKING COLUMNS */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {pillars.map((pillar) => {
-            const logsForPillar = timeLogs.filter(log => log.pillar === pillar.id && log.date === selectedDate);
-            const totalHours = getColumnTotalHours(pillar.id);
-            const entryState = manualEntry[pillar.id];
-
-            return (
-              <div 
-                key={pillar.id}
-                className={`glass-panel rounded-2xl border border-white/8 p-5 flex flex-col flex-1 h-fit transition-all duration-300 hover:border-white/15 ${pillar.glowClass}`}
-              >
-                
-                {/* Column Header */}
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/5">
-                  <div className="flex items-center space-x-2.5">
-                    <div className={`p-1.5 rounded-lg ${pillar.pillColor}`}>
-                      {pillar.icon}
-                    </div>
-                    <h2 className="text-lg font-bold tracking-tight text-white">
-                      {pillar.title}
-                    </h2>
-                  </div>
-                  <div className={`text-xs px-2.5 py-1 font-bold rounded-lg border flex items-center space-x-1.5 ${pillar.pillColor}`}>
-                    <Clock size={10} />
-                    <span>{totalHours}</span>
-                  </div>
-                </div>
-
-                {/* Column Manual Add Form */}
-                <div className="bg-zinc-950/50 border border-white/5 p-3.5 rounded-xl mb-5">
-                  <div className="flex space-x-2 mb-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="number"
-                        placeholder="Hr"
-                        min="0"
-                        max="24"
-                        value={entryState.hours}
-                        onChange={(e) => handleManualChange(pillar.id, 'hours', e.target.value)}
-                        className="w-full bg-zinc-900 border border-white/8 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-all font-mono"
-                      />
-                    </div>
-                    <div className="relative flex-1">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        min="0"
-                        max="59"
-                        value={entryState.minutes}
-                        onChange={(e) => handleManualChange(pillar.id, 'minutes', e.target.value)}
-                        className="w-full bg-zinc-900 border border-white/8 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-all font-mono"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      placeholder="What was completed?"
-                      value={entryState.note}
-                      onChange={(e) => handleManualChange(pillar.id, 'note', e.target.value)}
-                      className="flex-1 bg-zinc-900 border border-white/8 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-all"
-                    />
-                    <button
-                      onClick={() => handleManualAdd(pillar.id)}
-                      disabled={!(parseInt(entryState.hours) > 0 || parseInt(entryState.minutes) > 0)}
-                      className={`p-1.5 rounded-lg border flex items-center justify-center transition-all ${
-                        (parseInt(entryState.hours) > 0 || parseInt(entryState.minutes) > 0)
-                          ? 'bg-zinc-800 border-white/10 hover:bg-zinc-700 text-white cursor-pointer active:scale-95'
-                          : 'bg-zinc-900/20 border-white/5 text-zinc-600 cursor-not-allowed'
-                      }`}
-                      title="Log time manually"
-                    >
-                      <PlusCircle size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* List of Time Cards */}
-                <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1">
-                  {logsForPillar.length > 0 ? (
-                    logsForPillar.map((log) => (
-                      <div
-                        key={log.id}
-                        className="bg-zinc-900/30 border border-white/5 hover:border-white/10 hover:bg-zinc-900/50 rounded-xl p-3.5 relative group transition-all duration-200 animate-slide-up"
-                      >
-                        <div className="flex items-start justify-between">
-                          <span className={`text-xs px-2 py-0.5 font-bold rounded border ${pillar.pillColor}`}>
-                            {formatCardDuration(log.duration)}
-                          </span>
-                          
-                          {/* Trash button visible on hover/always on touch */}
-                          <button
-                            onClick={() => handleDeleteCard(log.id)}
-                            className="p-1 rounded bg-zinc-950 border border-white/5 text-zinc-500 hover:text-red-400 hover:border-red-500/20 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200"
-                            title="Delete log"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-
-                        <p className="text-zinc-300 text-xs mt-2 line-clamp-3 leading-relaxed">
-                          {log.note}
-                        </p>
-
-                        <div className="flex items-center space-x-1 mt-2 text-[10px] text-zinc-500">
-                          <Calendar size={10} />
-                          <span>{log.date}</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    // EMPTY STATE
-                    <div className="border border-dashed border-white/5 bg-zinc-900/10 rounded-xl p-6 text-center flex flex-col items-center justify-center h-48 transition-all">
-                      <div className="p-3 rounded-full bg-zinc-900 border border-white/5 mb-3">
-                        <Clock size={20} className="text-zinc-600" />
-                      </div>
-                      <p className="text-zinc-400 text-xs font-semibold leading-relaxed max-w-[200px]">
-                        No blocks logged for this pillar today. Time to lock in!
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            );
-          })}
-        </section>
       </main>
 
-      {/* NOTES SLIDE-OUT DRAWER */}
-      <aside 
-        className={`fixed top-0 right-0 h-screen w-full sm:w-[450px] glass-panel border-l border-white/10 shadow-2xl z-50 transition-transform duration-300 ease-in-out transform flex flex-col ${
-          isNotesOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        {/* Drawer Header */}
-        <div className="p-4 border-b border-white/5 flex items-center justify-between bg-zinc-950/80 backdrop-blur-md">
-          <div className="flex items-center space-x-2">
-            <FileText size={18} className="text-indigo-400" />
-            <h2 className="text-md font-bold tracking-tight text-white">Scratchpad</h2>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <span className="text-[10px] text-zinc-500 bg-zinc-900 border border-white/5 px-2 py-0.5 rounded font-mono">
-              {saveStatus}
-            </span>
-            <button 
-              onClick={() => setIsNotesOpen(false)}
-              className="p-1.5 rounded-lg border border-white/5 hover:bg-zinc-800/80 text-zinc-400 hover:text-white transition-all"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Drawer Format Toolbar */}
-        <div className="px-4 py-2 border-b border-white/5 bg-zinc-900/20 flex items-center space-x-2">
-          <button 
-            onClick={() => insertMarkdown('checkbox')} 
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
-            title="Insert Checkbox"
-          >
-            <CheckSquare size={14} />
-          </button>
-          <button 
-            onClick={() => insertMarkdown('bullet')} 
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
-            title="Insert Bullet List"
-          >
-            <List size={14} />
-          </button>
-          <button 
-            onClick={() => insertMarkdown('bold')} 
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
-            title="Insert Bold Text"
-          >
-            <Bold size={14} />
-          </button>
-          <button 
-            onClick={() => insertMarkdown('italic')} 
-            className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all"
-            title="Insert Italic Text"
-          >
-            <Italic size={14} />
-          </button>
-        </div>
-
-        {/* Drawer Textarea */}
-        <div className="flex-1 p-4 bg-zinc-950/20">
-          <textarea
-            id="notes-textarea"
-            value={notes}
-            onChange={handleNotesChange}
-            placeholder="Type your markdown checklist, study objectives, or brain-dump here. Your thoughts auto-save instantly."
-            className="w-full h-full bg-transparent resize-none border-none outline-none focus:ring-0 text-zinc-300 font-mono text-sm leading-relaxed placeholder-zinc-600 overflow-y-auto"
-          />
-        </div>
-      </aside>
-
-      {/* MODAL: STOPWATCH INJECTION DESCRIPTION */}
-      {injectModal.isOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-md rounded-2xl border border-white/10 p-6 shadow-2xl relative overflow-hidden animate-zoom-in">
-            
-            {/* Top Accent Strip */}
-            <div 
-              className="absolute top-0 left-0 right-0 h-1"
-              style={{ backgroundColor: pillars.find(p => p.id === injectModal.pillar)?.accentColor }}
-            />
-
-            <div className="flex items-center justify-between mb-4 mt-2">
-              <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                <span>Inject to {pillars.find(p => p.id === injectModal.pillar)?.title}</span>
-              </h3>
-              <button 
-                onClick={cancelInject}
-                className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <div className="bg-zinc-900 border border-white/5 px-4 py-3 rounded-xl flex items-center justify-between mb-4">
-                <span className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Accumulated Duration</span>
-                <span className="text-white font-mono font-bold text-md bg-zinc-950 px-2.5 py-1 rounded border border-white/5">
-                  {formatCardDuration(injectModal.duration)}
-                </span>
-              </div>
-
-              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">
-                Session Description (Optional)
-              </label>
-              <textarea
-                value={injectModal.note}
-                onChange={(e) => setInjectModal(prev => ({ ...prev, note: e.target.value }))}
-                placeholder="What did you work on during this sprint?"
-                rows={3}
-                className="w-full bg-zinc-900 border border-white/8 rounded-xl px-3 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-all resize-none"
-              />
-            </div>
-
-            <div className="flex items-center space-x-3 justify-end mt-6">
-              <button
-                onClick={cancelInject}
-                className="px-4 py-2 border border-white/5 bg-zinc-950 text-zinc-400 hover:text-white hover:bg-zinc-900 text-xs font-semibold rounded-xl transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmInject}
-                className="px-4 py-2 text-xs font-semibold rounded-xl text-white shadow-lg transition-all"
-                style={{ backgroundColor: pillars.find(p => p.id === injectModal.pillar)?.accentColor }}
-              >
-                Log Session
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
       {/* FOOTER */}
-      <footer className="border-t border-white/5 py-4 text-center mt-auto">
-        <span className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">
-          HyperTrack Time Engine v1.0.0 — Crafted for peak focus
-        </span>
+      <footer className="border-t border-zinc-100 py-6 text-center text-[10px] text-zinc-400 uppercase tracking-widest font-semibold bg-zinc-50/50">
+        Time Ledger v1.1.0 — Structured and simplified logging
       </footer>
 
     </div>
-  );
-}
-
-// Simple internal helper component for arrow icon
-function ArrowRightIcon({ size = 16, className = "" }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
   );
 }

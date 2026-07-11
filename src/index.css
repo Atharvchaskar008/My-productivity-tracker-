@@ -8,8 +8,8 @@
 @layer base {
   body {
     font-family: 'Poppins', sans-serif;
-    background-color: #09090b; /* zinc-950 equivalent */
-    color: #f4f4f5; /* zinc-100 equivalent */
+    background-color: #ffffff;
+    color: #18181b; /* zinc-900 */
     margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -17,41 +17,89 @@
   }
 }
 
-/* Custom Webkit scrollbar for premium dark mode feel */
+/* Premium minimalist scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(9, 9, 11, 0.5);
+  background: #ffffff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(63, 63, 70, 0.5);
-  border-radius: 4px;
+  background: #e4e4e7; /* zinc-200 */
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(82, 82, 91, 0.7);
+  background: #a1a1aa; /* zinc-400 */
 }
 
-/* Smooth glassmorphic backdrop styles */
-.glass-panel {
-  background: rgba(24, 24, 27, 0.6); /* zinc-900/60 */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Clock styling utilities */
+.clock-face {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 2px solid #18181b; /* zinc-900 */
+  background: #ffffff;
 }
 
-.glass-panel-glow-dsa {
-  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.15);
+.clock-center-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background-color: #18181b;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
 }
 
-.glass-panel-glow-dev {
-  box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.15);
+.clock-hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  width: 2px;
+  background-color: #18181b;
+  transform-origin: bottom center;
+  z-index: 5;
+  transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
 }
 
-.glass-panel-glow-study {
-  box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.15);
+.clock-tick {
+  position: absolute;
+  width: 2px;
+  background-color: #a1a1aa;
+}
+
+.clock-tick-major {
+  position: absolute;
+  width: 2px;
+  background-color: #18181b;
+}
+
+/* Table styling presets */
+.excel-table-container {
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.excel-input {
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  width: 100%;
+  font-family: inherit;
+  transition: all 0.2s ease-in-out;
+}
+
+.excel-input:focus {
+  border-color: #18181b;
+  background-color: #ffffff;
+  outline: none;
 }
