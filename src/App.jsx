@@ -257,19 +257,19 @@ export default function App() {
               <table className="w-full border-collapse text-left text-sm min-w-[700px]">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
-                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
+                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
                       Date
                     </th>
-                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[12%]">
+                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[12%]">
                       Block
                     </th>
-                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
+                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
                       Duration
                     </th>
-                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[42%]">
+                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[42%]">
                       Description / Notes
                     </th>
-                    <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[10%] text-center">
+                    <th scope="col" className="p-4 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[10%] text-center">
                       Action
                     </th>
                   </tr>
@@ -279,21 +279,21 @@ export default function App() {
                   {/* INLINE EXCEL DATA INSERTION ROW */}
                   <tr className="bg-zinc-50/50">
                     {/* Date Input */}
-                    <td className="p-2 border-r border-zinc-100">
+                    <td className="p-3 border-r border-zinc-100">
                       <input
                         type="date"
                         value={insertForm.date}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, date: e.target.value }))}
-                        className="w-full text-xs bg-white border border-zinc-200 rounded px-2 py-1.5 h-11 focus:outline-none focus:border-black font-medium"
+                        className="w-full text-xs bg-white border border-zinc-200 rounded px-3 py-2 h-12 focus:outline-none focus:border-black font-medium"
                       />
                     </td>
                     
                     {/* Block Select Dropdown */}
-                    <td className="p-2 border-r border-zinc-100">
+                    <td className="p-3 border-r border-zinc-100">
                       <select
                         value={insertForm.block}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, block: e.target.value }))}
-                        className="w-full text-xs bg-white border border-zinc-200 rounded px-2 py-1.5 h-11 focus:outline-none focus:border-black font-semibold"
+                        className="w-full text-xs bg-white border border-zinc-200 rounded px-3 py-2 h-12 focus:outline-none focus:border-black font-semibold"
                       >
                         <option value="DSA">DSA</option>
                         <option value="DEV">DEV</option>
@@ -302,7 +302,7 @@ export default function App() {
                     </td>
 
                     {/* Time Input (Hours / Minutes) */}
-                    <td className="p-2 border-r border-zinc-100">
+                    <td className="p-3 border-r border-zinc-100">
                       <div className="flex space-x-1">
                         <input
                           type="number"
@@ -311,7 +311,7 @@ export default function App() {
                           max="23"
                           value={insertForm.hours}
                           onChange={(e) => setInsertForm(prev => ({ ...prev, hours: e.target.value }))}
-                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-1.5 h-11 focus:outline-none focus:border-black font-mono"
+                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-2 h-12 focus:outline-none focus:border-black font-mono"
                         />
                         <input
                           type="number"
@@ -320,28 +320,28 @@ export default function App() {
                           max="59"
                           value={insertForm.minutes}
                           onChange={(e) => setInsertForm(prev => ({ ...prev, minutes: e.target.value }))}
-                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-1.5 h-11 focus:outline-none focus:border-black font-mono"
+                          className="w-1/2 text-xs text-center bg-white border border-zinc-200 rounded py-2 h-12 focus:outline-none focus:border-black font-mono"
                         />
                       </div>
                     </td>
 
                     {/* Description Text Input */}
-                    <td className="p-2 border-r border-zinc-100">
+                    <td className="p-3 border-r border-zinc-100">
                       <input
                         type="text"
                         placeholder="Log new sheet description..."
                         value={insertForm.note}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, note: e.target.value }))}
-                        className="w-full text-xs bg-white border border-zinc-200 rounded px-3 py-1.5 h-11 focus:outline-none focus:border-black"
+                        className="w-full text-xs bg-white border border-zinc-200 rounded px-4 py-2 h-12 focus:outline-none focus:border-black"
                       />
                     </td>
 
                     {/* Add Action Button */}
-                    <td className="p-2 text-center">
+                    <td className="p-3 text-center">
                       <button
                         onClick={handleAddRow}
                         disabled={!(parseInt(insertForm.hours) > 0 || parseInt(insertForm.minutes) > 0)}
-                        className={`w-full h-11 flex items-center justify-center rounded border transition-all ${
+                        className={`w-full h-12 flex items-center justify-center rounded border transition-all ${
                           (parseInt(insertForm.hours) > 0 || parseInt(insertForm.minutes) > 0)
                             ? 'bg-black border-black text-white hover:bg-zinc-800 cursor-pointer'
                             : 'bg-zinc-100 border-zinc-200 text-zinc-300 cursor-not-allowed'
@@ -358,13 +358,13 @@ export default function App() {
                     timeLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-zinc-50/70 transition-colors">
                         {/* Date Cell */}
-                        <td className="p-3 font-mono text-xs border-r border-zinc-100 text-zinc-500">
+                        <td className="p-4 font-mono text-xs border-r border-zinc-100 text-zinc-500">
                           {log.date}
                         </td>
                         
                         {/* Block Badge Cell */}
-                        <td className="p-3 border-r border-zinc-100">
-                          <span className={`text-xs font-bold px-3 py-1.5 rounded border tracking-wider ${
+                        <td className="p-4 border-r border-zinc-100">
+                          <span className={`text-[10px] font-bold px-4 py-2.5 rounded border tracking-widest uppercase ${
                             log.block === 'DSA' 
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                               : log.block === 'DEV'
@@ -376,27 +376,27 @@ export default function App() {
                         </td>
 
                         {/* Duration Cell */}
-                        <td className="p-3 font-mono text-sm font-semibold border-r border-zinc-100 text-zinc-900">
+                        <td className="p-4 font-mono text-sm font-semibold border-r border-zinc-100 text-zinc-900">
                           {formatTableDuration(log.duration)}
                         </td>
 
                         {/* Editable Description Cell */}
-                        <td className="p-2 border-r border-zinc-100">
+                        <td className="p-3 border-r border-zinc-100">
                           <input
                             id={`note-input-${log.id}`}
                             type="text"
                             value={log.note}
                             onChange={(e) => handleUpdateNote(log.id, e.target.value)}
                             placeholder="Add cell note..."
-                            className="excel-input text-xs px-2 py-1.5 focus:bg-white text-zinc-700 focus:text-zinc-900 leading-relaxed font-sans"
+                            className="excel-input text-xs px-3 py-2.5 focus:bg-white text-zinc-700 focus:text-zinc-900 leading-relaxed font-sans"
                           />
                         </td>
 
                         {/* Delete Cell */}
-                        <td className="p-2 text-center">
+                        <td className="p-3 text-center">
                           <button
                             onClick={() => handleDeleteRow(log.id)}
-                            className="w-8 h-8 mx-auto flex items-center justify-center rounded border border-zinc-100 bg-white text-zinc-400 hover:text-red-600 hover:border-red-100 hover:bg-red-50/50 transition-all"
+                            className="w-9 h-9 mx-auto flex items-center justify-center rounded border border-zinc-100 bg-white text-zinc-400 hover:text-red-600 hover:border-red-100 hover:bg-red-50/50 transition-all"
                             title="Delete Row"
                           >
                             <Trash2 size={12} />
@@ -424,16 +424,16 @@ export default function App() {
                   {/* EXCEL SUMMARY (FORMULA) FOOTER ROW */}
                   {showSummary && (
                     <tr className="bg-zinc-50 font-medium text-zinc-900 border-t-2 border-zinc-200">
-                      <td className="p-3 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
+                      <td className="p-4 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
                         Total SUM
                       </td>
-                      <td className="p-3 border-r border-zinc-100">
+                      <td className="p-4 border-r border-zinc-100">
                         {/* empty cell for block column */}
                       </td>
-                      <td className="p-3 font-mono text-sm font-bold border-r border-zinc-100 text-black">
+                      <td className="p-4 font-mono text-sm font-bold border-r border-zinc-100 text-black">
                         {formatTableDuration(totalSecondsAll)}
                       </td>
-                      <td className="p-3 text-xs text-zinc-500 leading-relaxed" colSpan="2">
+                      <td className="p-4 text-xs text-zinc-500 leading-relaxed" colSpan="2">
                         <div className="flex flex-wrap gap-x-4 gap-y-1">
                           <span>DSA: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DSA'))}</strong></span>
                           <span>DEV: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DEV'))}</strong></span>
