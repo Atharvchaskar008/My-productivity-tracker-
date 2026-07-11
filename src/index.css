@@ -4,17 +4,23 @@
 @theme {
   --font-sans: 'Poppins', sans-serif;
 
-  /* Nordic Minimalist palette */
-  --color-app-bg: #1C1D17;
-  --color-card-bg: #24261E;
-  --color-cream: #F3F4F0;
-  --color-sage-muted: #8E9280;
-  --color-sage: #A3B19B;
-  --color-terracotta: #D4A373;
-  --color-nordic-border: #36382F;
-  --color-card-hover: #2A2C24;
-  --color-sage-hover: #B0BEB0;
-  --color-terracotta-hover: #DEB88A;
+  /* Canva light palette */
+  --color-ivory: #EFEFE6;
+  --color-pewter: #C7C8CB;
+  --color-slate: #ABABAF;
+  --color-gray: #697272;
+
+  /* Semantic aliases */
+  --color-app-bg: #EFEFE6;
+  --color-card-bg: #FFFFFF;
+  --color-cream: #697272;
+  --color-sage-muted: #ABABAF;
+  --color-sage: #697272;
+  --color-terracotta: #ABABAF;
+  --color-nordic-border: #C7C8CB;
+  --color-card-hover: #F5F5F0;
+  --color-sage-hover: #5A6363;
+  --color-terracotta-hover: #95999A;
 }
 
 @layer base {
@@ -24,33 +30,33 @@
 
   body {
     font-family: 'Poppins', sans-serif;
-    background-color: #1C1D17;
-    color: #F3F4F0;
+    background-color: #EFEFE6;
+    color: #697272;
     margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    color-scheme: dark;
+    color-scheme: light;
   }
 }
 
-/* Organic minimal scrollbars */
+/* Light minimal scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1C1D17;
+  background: #EFEFE6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #36382F;
+  background: #C7C8CB;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8E9280;
+  background: #ABABAF;
 }
 
 /* Clock styling utilities */
@@ -59,8 +65,8 @@
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  border: 2px solid #36382F;
-  background: #1C1D17;
+  border: 2px solid #C7C8CB;
+  background: #FFFFFF;
 }
 
 .clock-center-dot {
@@ -69,7 +75,7 @@
   left: 50%;
   width: 8px;
   height: 8px;
-  background-color: #F3F4F0;
+  background-color: #697272;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
@@ -80,7 +86,7 @@
   bottom: 50%;
   left: 50%;
   width: 2px;
-  background-color: #F3F4F0;
+  background-color: #697272;
   transform-origin: bottom center;
   z-index: 5;
   transition: transform 0.1s cubic-bezier(0.4, 2.08, 0.55, 0.44);
@@ -89,22 +95,22 @@
 .clock-tick {
   position: absolute;
   width: 2px;
-  background-color: #8E9280;
+  background-color: #ABABAF;
 }
 
 .clock-tick-major {
   position: absolute;
   width: 2px;
-  background-color: #F3F4F0;
+  background-color: #697272;
 }
 
 /* Table styling presets */
 .excel-table-container {
-  border: 1px solid #36382F;
+  border: 1px solid #C7C8CB;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #24261E;
-  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.2);
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 16px 0 rgba(105, 114, 114, 0.08);
 }
 
 .excel-input {
@@ -114,17 +120,17 @@
   width: 100%;
   min-width: 0;
   font-family: inherit;
-  color: #F3F4F0;
+  color: #697272;
   transition: all 0.2s ease-in-out;
 }
 
 .excel-input::placeholder {
-  color: #8E9280;
+  color: #ABABAF;
 }
 
 .excel-input:focus {
-  border-color: #A3B19B;
-  background-color: #1C1D17;
+  border-color: #697272;
+  background-color: #FFFFFF;
   outline: none;
 }
 
