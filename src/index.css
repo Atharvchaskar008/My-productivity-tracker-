@@ -109,8 +109,10 @@
   border: 1px solid #C7C8CB;
   border-radius: 8px;
   overflow: hidden;
+  overflow-x: auto;           /* allow horizontal scroll inside container */
   background-color: #FFFFFF;
   box-shadow: 0 2px 16px 0 rgba(105, 114, 114, 0.08);
+  max-width: 100%;            /* never wider than its parent */
 }
 
 .excel-input {

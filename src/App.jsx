@@ -352,9 +352,9 @@ function UndoToast({ label, onUndo, onDismiss, durationMs = 5000 }) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 right-6 z-[100] animate-modal-in"
+      className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-72 z-[100] animate-modal-in"
     >
-      <div className="bg-white border border-pewter rounded-xl shadow-[0_4px_24px_rgba(105,114,114,0.18)] overflow-hidden w-72">
+      <div className="bg-white border border-pewter rounded-xl shadow-[0_4px_24px_rgba(105,114,114,0.18)] overflow-hidden w-full">
         <div className="px-4 py-3 flex items-center gap-3">
           {/* Icon */}
           <div className="w-7 h-7 rounded-lg bg-ivory border border-pewter flex items-center justify-center shrink-0">
@@ -667,7 +667,6 @@ export default function App() {
             <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4 min-w-0">
 
               <div className="excel-table-container min-w-0">
-                <div className="overflow-x-auto lg:overflow-x-visible">
                   <table className="w-full table-fixed border-collapse text-left text-sm min-w-[750px] lg:min-w-0">
                     <thead>
                       <tr className="bg-card-bg border-b border-pewter">
@@ -827,7 +826,6 @@ export default function App() {
 
                     </tbody>
                   </table>
-                </div>
               </div>
 
               <div className="flex items-center justify-between">
