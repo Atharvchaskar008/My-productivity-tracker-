@@ -210,15 +210,6 @@ export default function App() {
         {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
         <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4 min-w-0">
           
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setShowSummary(!showSummary)}
-              className="h-10 px-4 text-xs font-semibold rounded border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 transition-all flex items-center space-x-1.5 active:scale-95"
-            >
-              <span>{showSummary ? 'Hide Sum Totals' : 'Show Sum Totals'}</span>
-            </button>
-          </div>
-
           <div className="excel-table-container min-w-0">
             <div className="overflow-x-auto lg:overflow-x-visible">
               <table className="w-full table-fixed border-collapse text-left text-sm min-w-[750px] lg:min-w-0">
@@ -407,6 +398,15 @@ export default function App() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setShowSummary(!showSummary)}
+              className="h-10 px-4 text-xs font-semibold rounded border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 transition-all flex items-center space-x-1.5 active:scale-95"
+            >
+              <span>{showSummary ? 'Hide Sum Totals' : 'Show Sum Totals'}</span>
+            </button>
           </div>
 
         </section>
