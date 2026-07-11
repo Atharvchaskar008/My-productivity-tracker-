@@ -74,6 +74,9 @@ export default function App() {
   // Reference to focus description of newly injected row
   const newlyCreatedRowIdRef = useRef(null);
 
+  // Toggle sum visibility state
+  const [showSummary, setShowSummary] = useState(false);
+
   // --- PERSISTENCE ---
   useEffect(() => {
     localStorage.setItem('hypertrack_excel_logs', JSON.stringify(timeLogs));
@@ -216,18 +219,17 @@ export default function App() {
       
       {/* HEADER SECTION (MINIMALIST) */}
       <header className="border-b border-zinc-200 py-6 px-6 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-black uppercase">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-4">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-black uppercase">
               Time Ledger
             </h1>
-            <p className="text-xs text-zinc-400 font-medium tracking-wide mt-1">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
-            </p>
+            <span className="text-lg sm:text-xl font-bold text-zinc-400 uppercase">
+              — Logged Time Sheets
+            </span>
           </div>
-          <div className="flex items-center space-x-1.5 text-xs text-zinc-400 font-medium tracking-wider uppercase">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Local Engine Active</span>
+          <div className="text-xs text-zinc-400 font-medium tracking-wider uppercase sm:text-right">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
         </div>
       </header>
@@ -236,12 +238,15 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
-        <section className="lg:col-span-8 flex flex-col space-y-4">
+        <section className="lg:col-span-8 order-2 lg:order-1 flex flex-col space-y-4">
           
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold tracking-wider uppercase text-zinc-500">
-              Logged Time Sheets
-            </span>
+            <button
+              onClick={() => setShowSummary(!showSummary)}
+              className="h-10 px-4 text-xs font-semibold rounded border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 transition-all flex items-center space-x-1.5 active:scale-95"
+            >
+              <span>{showSummary ? 'Hide Sum Totals' : 'Show Sum Totals'}</span>
+            </button>
             <span className="text-xs text-zinc-400">
               *Double click description cell to edit notes directly.
             </span>
@@ -249,7 +254,7 @@ export default function App() {
 
           <div className="excel-table-container">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm">
+              <table className="w-full border-collapse text-left text-sm min-w-[700px]">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
                     <th scope="col" className="p-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
@@ -359,7 +364,7 @@ export default function App() {
                         
                         {/* Block Badge Cell */}
                         <td className="p-3 border-r border-zinc-100">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                          <span className={`text-xs font-bold px-3 py-1.5 rounded border tracking-wider ${
                             log.block === 'DSA' 
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                               : log.block === 'DEV'
@@ -417,24 +422,26 @@ export default function App() {
                   )}
 
                   {/* EXCEL SUMMARY (FORMULA) FOOTER ROW */}
-                  <tr className="bg-zinc-50 font-medium text-zinc-900 border-t-2 border-zinc-200">
-                    <td className="p-3 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
-                      Total SUM
-                    </td>
-                    <td className="p-3 border-r border-zinc-100">
-                      {/* empty cell for block column */}
-                    </td>
-                    <td className="p-3 font-mono text-sm font-bold border-r border-zinc-100 text-black">
-                      {formatTableDuration(totalSecondsAll)}
-                    </td>
-                    <td className="p-3 text-xs text-zinc-500 leading-relaxed" colSpan="2">
-                      <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        <span>DSA: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DSA'))}</strong></span>
-                        <span>DEV: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DEV'))}</strong></span>
-                        <span>AI: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('AI'))}</strong></span>
-                      </div>
-                    </td>
-                  </tr>
+                  {showSummary && (
+                    <tr className="bg-zinc-50 font-medium text-zinc-900 border-t-2 border-zinc-200">
+                      <td className="p-3 text-xs font-bold uppercase tracking-wider text-zinc-500 border-r border-zinc-100">
+                        Total SUM
+                      </td>
+                      <td className="p-3 border-r border-zinc-100">
+                        {/* empty cell for block column */}
+                      </td>
+                      <td className="p-3 font-mono text-sm font-bold border-r border-zinc-100 text-black">
+                        {formatTableDuration(totalSecondsAll)}
+                      </td>
+                      <td className="p-3 text-xs text-zinc-500 leading-relaxed" colSpan="2">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1">
+                          <span>DSA: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DSA'))}</strong></span>
+                          <span>DEV: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('DEV'))}</strong></span>
+                          <span>AI: <strong className="text-black font-semibold">{formatHoursDecimal(getPillarTotalSeconds('AI'))}</strong></span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
 
                 </tbody>
               </table>
@@ -444,7 +451,7 @@ export default function App() {
         </section>
 
         {/* RIGHT COLUMN (4 COLS): CIRCULAR CLOCK STOPWATCH */}
-        <section className="lg:col-span-4 flex flex-col items-center p-6 border border-zinc-200 rounded-2xl bg-white shadow-sm h-fit space-y-6">
+        <section className="lg:col-span-4 order-1 lg:order-2 flex flex-col items-center p-6 border border-zinc-200 rounded-2xl bg-white shadow-sm h-fit space-y-6">
           
           <div className="w-full text-center">
             <span className="text-xs font-bold tracking-widest uppercase text-zinc-400 block mb-1">
