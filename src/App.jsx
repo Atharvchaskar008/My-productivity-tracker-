@@ -215,7 +215,7 @@ export default function App() {
   const minutesRotation = (stopwatchTime / 60) * 6;
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-white text-zinc-900 flex flex-col font-sans transition-colors duration-300 overflow-x-hidden">
       
       {/* HEADER SECTION (MINIMALIST) */}
       <header className="border-b border-zinc-200 py-6 px-6 sm:px-8 bg-zinc-50/30">
@@ -230,10 +230,10 @@ export default function App() {
       </header>
 
       {/* TWO-COLUMN GRID LAYOUT (ADHERING TO 8PT GRID & INWARD COLLAPSE) */}
-      <main className="flex-1 max-w-[1500px] w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="flex-1 max-w-[1500px] w-full mx-auto p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 min-w-0">
         
         {/* LEFT COLUMN (8 COLS): EXCEL SPREADSHEET TABLE */}
-        <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4">
+        <section className="lg:col-span-8 order-1 lg:order-1 flex flex-col space-y-4 min-w-0">
           
           <div className="flex items-center justify-between">
             <button
@@ -244,9 +244,9 @@ export default function App() {
             </button>
           </div>
 
-          <div className="excel-table-container">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm min-w-[750px] lg:min-w-full">
+          <div className="excel-table-container min-w-0">
+            <div className="overflow-x-auto lg:overflow-x-visible">
+              <table className="w-full table-fixed border-collapse text-left text-sm min-w-[750px] lg:min-w-0">
                 <thead>
                   <tr className="bg-zinc-50 border-b border-zinc-200">
                     <th scope="col" className="p-5 text-xs font-semibold uppercase tracking-wider text-zinc-500 w-[18%]">
@@ -276,7 +276,7 @@ export default function App() {
                         type="date"
                         value={insertForm.date}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, date: e.target.value }))}
-                        className="w-full text-sm bg-white border border-zinc-200 rounded px-4 py-2.5 h-14 focus:outline-none focus:border-black font-medium"
+                        className="w-full max-w-full min-w-0 text-sm bg-white border border-zinc-200 rounded px-4 py-2.5 h-14 focus:outline-none focus:border-black font-medium"
                       />
                     </td>
                     
