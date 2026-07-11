@@ -32,132 +32,154 @@ function BlockSetupModal({ onComplete }) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // Auto-focus input
     if (inputRef.current) inputRef.current.focus();
   }, []);
 
   const addBlock = () => {
     const trimmed = inputValue.trim().toUpperCase();
     if (!trimmed) return;
-    if (trimmed.length > 20) {
-      setError('Block name must be 20 characters or less.');
-      return;
-    }
-    if (blocks.includes(trimmed)) {
-      setError('That block already exists.');
-      return;
-    }
+    if (trimmed.length > 20) { setError('Block name must be 20 characters or less.'); return; }
+    if (blocks.includes(trimmed)) { setError('You already added that block.'); return; }
     setBlocks(prev => [...prev, trimmed]);
     setInputValue('');
     setError('');
   };
 
-  const removeBlock = (block) => {
-    setBlocks(prev => prev.filter(b => b !== block));
-  };
+  const removeBlock = (block) => setBlocks(prev => prev.filter(b => b !== block));
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') addBlock();
-  };
+  const handleKeyDown = (e) => { if (e.key === 'Enter') addBlock(); };
 
   const handleComplete = () => {
-    if (blocks.length === 0) {
-      setError('Add at least one block to continue.');
-      return;
-    }
+    if (blocks.length === 0) { setError('Add at least one block to continue.'); return; }
     onComplete(blocks);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(105,114,114,0.18)', backdropFilter: 'blur(6px)' }}>
-      <div className="bg-white border border-pewter rounded-2xl shadow-[0_8px_48px_rgba(105,114,114,0.18)] w-full max-w-md mx-4 p-8 flex flex-col gap-6 animate-modal-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ backgroundColor: 'rgba(60,65,65,0.45)', backdropFilter: 'blur(8px)' }}
+    >
+      <div className="bg-white border border-pewter rounded-2xl shadow-[0_16px_64px_rgba(105,114,114,0.22)] w-full max-w-[460px] flex flex-col animate-modal-in overflow-hidden">
 
-        {/* Header */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1">
-            <PenLine size={18} className="text-gray" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-slate">Welcome to TimeLedger</span>
-          </div>
-          <h2 className="text-xl font-bold text-gray tracking-tight leading-snug">
-            Build your study blocks
-          </h2>
-          <p className="text-xs text-slate leading-relaxed">
-            Create the categories you want to track — e.g. <em>DSA</em>, <em>DevOps</em>, <em>Math</em>. You can edit these any time later.
-          </p>
-        </div>
+        {/* Gradient top bar */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-pewter via-slate to-gray" />
 
-        {/* Input Row */}
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Type a block name..."
-              value={inputValue}
-              onChange={e => { setInputValue(e.target.value); setError(''); }}
-              onKeyDown={handleKeyDown}
-              maxLength={20}
-              className="flex-1 text-sm bg-ivory border border-pewter rounded-lg px-4 py-2.5 focus:outline-none focus:border-gray text-gray placeholder:text-slate font-medium"
-            />
-            <button
-              onClick={addBlock}
-              className="w-10 h-10 flex items-center justify-center rounded-lg border border-pewter bg-gray text-ivory hover:bg-sage-hover transition-all active:scale-95 shrink-0"
-              title="Add block"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-          {error && (
-            <div className="flex items-center gap-1.5 text-[11px] text-terracotta-hover">
-              <AlertCircle size={12} />
-              <span>{error}</span>
+        <div className="p-8 flex flex-col gap-7">
+
+          {/* Step badge + heading */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ivory border border-pewter text-[10px] font-bold tracking-[0.18em] uppercase text-slate">
+                <PenLine size={10} />
+                First-time setup
+              </span>
             </div>
-          )}
-        </div>
-
-        {/* Block Chips */}
-        <div className="min-h-[56px]">
-          {blocks.length === 0 ? (
-            <p className="text-[11px] text-slate/70 italic text-center py-4">
-              No blocks yet — add your first one above.
+            <h2 className="text-2xl font-bold text-gray tracking-tight leading-tight">
+              What do you want<br />to track?
+            </h2>
+            <p className="text-[12px] text-slate leading-relaxed">
+              Name your study blocks — things like <em>DSA</em>, <em>Dev</em>, <em>Reading</em>, <em>Math</em>. Each block becomes a trackable category. You can always edit them later.
             </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {blocks.map(block => (
-                <span
-                  key={block}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-pewter bg-ivory text-gray text-[11px] font-bold tracking-widest uppercase group"
-                >
-                  {block}
-                  <button
-                    onClick={() => removeBlock(block)}
-                    className="text-slate hover:text-gray transition-colors"
-                    title={`Remove ${block}`}
-                  >
-                    <X size={11} />
-                  </button>
-                </span>
-              ))}
+          </div>
+
+          {/* Input */}
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate">Block name</label>
+            <div className="flex gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="e.g. DSA, Dev, Maths, Reading..."
+                value={inputValue}
+                onChange={e => { setInputValue(e.target.value); setError(''); }}
+                onKeyDown={handleKeyDown}
+                maxLength={20}
+                className="flex-1 text-sm bg-ivory border border-pewter rounded-xl px-4 py-3 focus:outline-none focus:border-gray text-gray placeholder:text-slate font-medium transition-colors"
+              />
+              <button
+                onClick={addBlock}
+                className="px-4 h-12 flex items-center gap-1.5 rounded-xl border border-gray bg-gray text-ivory text-xs font-bold tracking-wider hover:bg-sage-hover active:scale-95 transition-all shrink-0"
+              >
+                <Plus size={14} />
+                Add
+              </button>
             </div>
-          )}
+            {error ? (
+              <div className="flex items-center gap-1.5 text-[11px] text-terracotta-hover">
+                <AlertCircle size={12} />
+                <span>{error}</span>
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate/60">Press <kbd className="px-1.5 py-0.5 bg-ivory border border-pewter rounded text-[10px] font-mono">Enter</kbd> or click Add</p>
+            )}
+          </div>
+
+          {/* Block list — numbered, card style */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate">Your blocks</span>
+              {blocks.length > 0 && (
+                <span className="text-[10px] font-bold text-gray bg-ivory border border-pewter rounded-full px-2.5 py-0.5">
+                  {blocks.length} block{blocks.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+
+            {blocks.length === 0 ? (
+              <div className="border border-dashed border-pewter rounded-xl py-6 flex flex-col items-center gap-1.5">
+                <div className="w-8 h-8 rounded-full bg-ivory border border-pewter flex items-center justify-center">
+                  <Plus size={14} className="text-slate" />
+                </div>
+                <p className="text-[11px] text-slate/60 text-center">Your blocks will appear here</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1.5 max-h-44 overflow-y-auto pr-1">
+                {blocks.map((block, i) => (
+                  <div
+                    key={block}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-pewter bg-ivory group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-5 h-5 rounded-full bg-white border border-pewter text-[10px] font-bold text-slate flex items-center justify-center shrink-0">
+                        {i + 1}
+                      </span>
+                      <span className="text-sm font-bold tracking-widest uppercase text-gray">{block}</span>
+                    </div>
+                    <button
+                      onClick={() => removeBlock(block)}
+                      className="w-6 h-6 flex items-center justify-center rounded-lg border border-transparent text-slate hover:text-gray hover:border-pewter hover:bg-white transition-all"
+                      title={`Remove ${block}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={handleComplete}
+            disabled={blocks.length === 0}
+            className={`w-full h-12 rounded-xl text-sm font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+              blocks.length > 0
+                ? 'bg-gray text-ivory hover:bg-sage-hover shadow-sm'
+                : 'bg-ivory border border-pewter text-slate cursor-not-allowed'
+            }`}
+          >
+            <Check size={16} />
+            {blocks.length === 0 ? 'Add a block to continue' : `Start Tracking with ${blocks.length} block${blocks.length !== 1 ? 's' : ''}`}
+          </button>
+
         </div>
-
-        {/* Continue Button */}
-        <button
-          onClick={handleComplete}
-          className="w-full h-12 rounded-xl bg-gray text-ivory text-sm font-semibold tracking-wider uppercase hover:bg-sage-hover active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-        >
-          <Check size={16} />
-          Start Tracking
-        </button>
-
       </div>
     </div>
   );
 }
 
 // ─── EDIT BLOCKS PANEL ───────────────────────────────────────────────────────
-function EditBlocksPanel({ blocks, onSave, onClose }) {
+function EditBlocksPanel({ blocks, onSave, onClose, onReset }) {
   const [localBlocks, setLocalBlocks] = useState([...blocks]);
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState('');
@@ -281,19 +303,28 @@ function EditBlocksPanel({ blocks, onSave, onClose }) {
         </div>
 
         {/* Panel Footer */}
-        <div className="px-6 py-4 border-t border-pewter flex gap-2">
+        <div className="px-6 py-4 border-t border-pewter flex flex-col gap-2">
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="flex-1 h-10 rounded-lg border border-pewter text-slate text-xs font-semibold hover:border-gray/40 hover:text-gray transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="flex-1 h-10 rounded-lg bg-gray text-ivory text-xs font-semibold hover:bg-sage-hover active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+            >
+              <Check size={13} />
+              Save
+            </button>
+          </div>
+          {/* Re-run setup */}
           <button
-            onClick={onClose}
-            className="flex-1 h-10 rounded-lg border border-pewter text-slate text-xs font-semibold hover:border-gray/40 hover:text-gray transition-all"
+            onClick={onReset}
+            className="w-full h-8 rounded-lg border border-dashed border-pewter text-slate text-[10px] font-semibold hover:border-gray/40 hover:text-gray transition-all tracking-wider uppercase"
           >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 h-10 rounded-lg bg-gray text-ivory text-xs font-semibold hover:bg-sage-hover active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
-          >
-            <Check size={13} />
-            Save
+            ↺ Re-run first-time setup
           </button>
         </div>
 
@@ -330,6 +361,13 @@ export default function App() {
   const handleSaveBlocks = (blocks) => {
     setCustomBlocks(blocks);
     setShowEditPanel(false);
+  };
+
+  // Reset to first-visit setup
+  const handleResetSetup = () => {
+    setShowEditPanel(false);
+    setCustomBlocks(null);
+    localStorage.removeItem('hypertrack_custom_blocks');
   };
 
   // ── Time Logs ──
@@ -481,6 +519,7 @@ export default function App() {
           blocks={customBlocks}
           onSave={handleSaveBlocks}
           onClose={() => setShowEditPanel(false)}
+          onReset={handleResetSetup}
         />
       )}
 
