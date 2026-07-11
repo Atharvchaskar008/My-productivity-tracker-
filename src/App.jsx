@@ -244,7 +244,7 @@ export default function App() {
                         type="date"
                         value={insertForm.date}
                         onChange={(e) => setInsertForm(prev => ({ ...prev, date: e.target.value }))}
-                        className="w-full max-w-full min-w-0 text-sm bg-white border border-pewter rounded px-4 py-2.5 h-14 focus:outline-none focus:border-gray text-gray font-medium"
+                        className="w-full max-w-full min-w-0 text-sm text-left bg-white border border-pewter rounded pl-3 pr-1 py-2.5 h-14 focus:outline-none focus:border-gray text-gray font-medium"
                       />
                     </td>
                     
