@@ -108,3 +108,13 @@
   background-color: #ffffff;
   outline: none;
 }
+
+/* Hide Vercel deployment toolbar */
+vercel-live-feedback,
+#vercel-live-feedback,
+[data-vercel-toolbar],
+iframe[src*="vercel.live"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

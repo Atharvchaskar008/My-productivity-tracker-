@@ -195,12 +195,12 @@ export default function App() {
       
       <main className="flex-1 max-w-[1500px] w-full mx-auto px-6 sm:px-8 pt-8 sm:pt-10 pb-8 min-w-0">
         
-        {/* PAGE HEADER — aligned with content grid */}
-        <header className="mb-8 lg:mb-10">
+        {/* PAGE HEADER — title left, date top right */}
+        <header className="mb-8 lg:mb-10 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-[0.25em] text-black uppercase">
             TIMELEDGER
           </h1>
-          <p className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase mt-2">
+          <p className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase sm:text-right sm:pt-2">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
           </p>
         </header>

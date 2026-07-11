@@ -2,5 +2,8 @@
   "cleanUrls": true,
   "framework": "vite",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "env": {
+    "VERCEL_PREVIEW_FEEDBACK_ENABLED": "0"
+  }
 }
